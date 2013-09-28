@@ -1,15 +1,22 @@
 #include "bodyparsermain.h"
 
+#include <QJsonDocument>
+#include <QDebug>
+
 BodyParserMain::BodyParserMain(QObject *parent) :
     BodyParserBase(parent)
 {
 }
 
-void BodyParserMain::parse(QString path, QByteArray body)
+void BodyParserMain::parse(QUrl url, QByteArray body)
 {
-    if (path.startsWith("/kcsapi/")) {
-        QStringList args;
-        args << path << QString::fromUtf8(body);
-        runHandlers("test", args);
+    if (url.path().startsWith("/kcsapi/")) {
+        // 先頭の`svdata=`を削除
+        body.remove(0, body.indexOf("=")+1);
+
+        // JSON のパース
+        QJsonDocument json = QJsonDocument::fromJson(body);
+
+        qDebug() << json.toJson();
     }
 }

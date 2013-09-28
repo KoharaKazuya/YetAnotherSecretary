@@ -1,6 +1,8 @@
 #ifndef YASWEBPROXY_H
 #define YASWEBPROXY_H
 
+#include "httpparser.h"
+
 #include <QObject>
 #include <QtNetwork/QTcpServer>
 #include <QtNetwork/QTcpSocket>
@@ -13,9 +15,11 @@ public:
     ~YASWebProxy();
 
 signals:
-    void apiResponse(QString path, QByteArray res);
+    void apiResponse(QUrl, QByteArray res);
 
 public slots:
+    void onRequest(QByteArray body);
+    void onResponse(QByteArray body);
 
 private:
     QTcpServer* server;

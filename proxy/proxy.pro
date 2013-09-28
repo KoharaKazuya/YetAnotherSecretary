@@ -18,9 +18,11 @@ TEMPLATE = app
 SOURCES += main.cpp \
     yaswebproxy.cpp \
     bodyparserbase.cpp \
-    bodyparsermain.cpp
+    bodyparsermain.cpp \
+    httpparser.cpp
 
 HEADERS += \
     yaswebproxy.h \
     bodyparserbase.h \
-    bodyparsermain.h
+    bodyparsermain.h \
+    httpparser.h

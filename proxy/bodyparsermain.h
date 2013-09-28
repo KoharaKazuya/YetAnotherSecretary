@@ -12,7 +12,7 @@ public:
 signals:
 
 public slots:
-    void parse(QString path, QByteArray body);
+    void parse(QUrl url, QByteArray body);
 
 };
 

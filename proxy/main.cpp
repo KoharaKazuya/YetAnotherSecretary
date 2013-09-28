@@ -28,7 +28,7 @@ int main(int argc, char *argv[])
 
     YASWebProxy* proxy = new YASWebProxy(port);
     BodyParserMain* mainParser = new BodyParserMain();
-    QObject::connect(proxy, SIGNAL(apiResponse(QString,QByteArray)), mainParser, SLOT(parse(QString,QByteArray)));
+    QObject::connect(proxy, SIGNAL(apiResponse(QUrl,QByteArray)), mainParser, SLOT(parse(QUrl,QByteArray)));
 
     return a.exec();
 }

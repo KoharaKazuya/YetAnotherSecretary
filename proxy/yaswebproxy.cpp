@@ -25,6 +25,9 @@ void YASWebProxy::openNewSocket()
     QTcpSocket* socket = server->nextPendingConnection();
     connect(socket, SIGNAL(readyRead()), this, SLOT(openTunnel()));
     connect(socket, SIGNAL(disconnected()), socket, SLOT(deleteLater()));
+    HttpParser* parser = new HttpParser(HttpParser::REQUEST, socket);
+    parser->setObjectName("requestParser");
+    connect(parser, SIGNAL(completeMessage(QByteArray)), this, SLOT(onRequest(QByteArray)));
 }
 
 /**
@@ -35,85 +38,36 @@ void YASWebProxy::openTunnel()
     QTcpSocket* socket = qobject_cast<QTcpSocket*>(sender());
     QByteArray data = socket->readAll();
 
-    // 前回の残り
-    // POST のボディ部など
-    if (!socket->property("remainToRead").isNull()) {
-        QTcpSocket* prevProxySocket = socket->findChild<QTcpSocket*>();
-        prevProxySocket->write(data);
-        socket->setProperty("remainToRead", QVariant());
-        return;
-    }
-
-    // ヘッダのパース
-    int pos = data.indexOf("\r\n\r\n");
-    QByteArray header = data.left(pos);
-    data.remove(0, pos+4);
-    QTextStream headerIn(header);
-    QString requestLine = headerIn.readLine();
-    QHash<QString, QString> headerHash;
-    QString line;
-    QString headers;
-    while (!(line = headerIn.readLine()).isNull()) {
-        QStringList kv = line.split(':');
-        headerHash[kv.value(0).trimmed()] = kv.value(1).trimmed();
-        headers += line + "\r\n";
-    }
-
-    // リクエスト (1 行目) のパース
-    QStringList requestList = requestLine.split(' ');
-    QString method = requestList.value(0);
-    QString address = requestList.value(1);
-    QString version = requestList.value(2);
-
-    bool isConnect = method == "CONNECT";
-    socket->setProperty("isCONNECT", isConnect);
-
-    // 本来の宛先のパース
-    QUrl url((isConnect ? "https://" : "") + address);
-    if (!url.isValid()) {
-        qWarning() << "Invalid URL: " << url;
-        socket->disconnectFromHost();
-        return;
-    }
-    QString host = url.host();
-    int port = url.port(80);
-
-    // 送信するデータの作成
-    address.remove(QRegExp("^[^:]+://[^:/]+(:\\d+)?"));
-    QByteArray message = (method + " " + address + " " + version + "\r\n"
-                          + headers).toLatin1() + "\r\n" + data;
-
-    // Content-Length の処理
-    if (!headerHash["Content-Length"].isNull()) {
-        int remain = headerHash["Content-Length"].toInt();
-        remain -= data.size();
-        socket->setProperty("remainToRead", remain);
-    }
+    HttpParser* parser = socket->findChild<HttpParser*>("requestParser");
+    parser->input(data);
 
     QTcpSocket* proxySocket = socket->findChild<QTcpSocket*>("tunnel");
     if (!proxySocket) {
         // 本来のホストへのソケットを作成
         proxySocket = new QTcpSocket(socket);
         proxySocket->setObjectName("tunnel");
-        proxySocket->connectToHost(host, port);
-
-        proxySocket->setProperty("path", url.path());
+        proxySocket->connectToHost(parser->url.host(), parser->url.port(80));
 
         connect(proxySocket, SIGNAL(disconnected()), this, SLOT(closeProxySocket()));
         connect(proxySocket, SIGNAL(error(QAbstractSocket::SocketError)), this, SLOT(closeProxySocket()));
 
         connect(proxySocket, SIGNAL(readyRead()), this, SLOT(forwardResponse()));
-        if (isConnect) {
+        if (parser->method == "CONNECT") {
             disconnect(socket, SIGNAL(readyRead()), this, SLOT(openTunnel()));
             connect(socket, SIGNAL(readyRead()), this, SLOT(forwardRequest()));
+        } else {
+            HttpParser* resParser = new HttpParser(HttpParser::RESPONSE, proxySocket);
+            resParser->setObjectName("responseParser");
+            resParser->setProperty("url", parser->url.toString());
+            connect(resParser, SIGNAL(completeMessage(QByteArray)), this, SLOT(onResponse(QByteArray)));
         }
     }
 
     if (proxySocket->waitForConnected()) {
-        if (isConnect) {
+        if (parser->method == "CONNECT") {
             socket->write("HTTP/1.0 200 Connection established\r\n\r\n");
         } else {
-            proxySocket->write(message);
+            proxySocket->write(parser->dequeueData());
         }
     } else {
         proxySocket->disconnect();
@@ -128,12 +82,14 @@ void YASWebProxy::forwardResponse()
     QTcpSocket* proxySocket = qobject_cast<QTcpSocket*>(sender());
     QTcpSocket* socket = qobject_cast<QTcpSocket*>(proxySocket->parent());
     QByteArray res = proxySocket->readAll();
-    socket->write(res);
 
-    QString path = proxySocket->property("path").toString();
-    int pos = res.indexOf("\r\n\r\n");
-    QByteArray body = res.right(res.size() - pos - 4);
-    emit apiResponse(path, body);
+    HttpParser* parser = proxySocket->findChild<HttpParser*>("responseParser");
+    if (parser != 0) {
+        parser->input(res);
+        socket->write(parser->dequeueData());
+    } else {
+        socket->write(res);
+    }
 }
 
 /**
@@ -159,4 +115,16 @@ void YASWebProxy::closeProxySocket()
             socket->disconnectFromHost();
         proxySocket->deleteLater();
     }
+}
+
+void YASWebProxy::onRequest(QByteArray body)
+{
+//    emit apiResponse(url, body);
+}
+
+void YASWebProxy::onResponse(QByteArray body)
+{
+    HttpParser* resParser = qobject_cast<HttpParser*>(sender());
+    QUrl url = QUrl(resParser->property("url").toString());
+    emit apiResponse(url, body);
 }
