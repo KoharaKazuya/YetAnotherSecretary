@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QUrl>
 
 namespace Ui {
 class MainWindow;
@@ -30,6 +31,8 @@ private slots:
 
 private:
     Ui::MainWindow *ui;
+
+    const QUrl gameUrl = QUrl("http://www.dmm.com/netgame/social/-/gadgets/=/app_id=854854/");
 };
 
 #endif // MAINWINDOW_H
