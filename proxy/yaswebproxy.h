@@ -9,7 +9,7 @@ class YASWebProxy : public QObject
 {
     Q_OBJECT
 public:
-    explicit YASWebProxy(QObject *parent = 0);
+    explicit YASWebProxy(int port, QObject *parent = 0);
     ~YASWebProxy();
 
 signals:

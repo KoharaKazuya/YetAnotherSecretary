@@ -3,11 +3,11 @@
 #include <QUrl>
 #include <QRegExp>
 
-YASWebProxy::YASWebProxy(QObject *parent) :
+YASWebProxy::YASWebProxy(int port, QObject *parent) :
     QObject(parent)
 {
     server = new QTcpServer(this);
-    server->listen(QHostAddress::Any, 8888);
+    server->listen(QHostAddress("127.0.0.1"), port);
     connect(server, SIGNAL(newConnection()), this, SLOT(openNewSocket()));
     qDebug() << "listen start on Port " << server->serverPort();
 }
