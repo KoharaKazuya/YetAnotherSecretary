@@ -4,6 +4,9 @@
 #include <QtWebKit>
 #include <QWebFrame>
 #include <QTimer>
+#include <QFile>
+#include <QNetworkCookie>
+#include <QNetworkCookieJar>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -11,18 +14,44 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
+    // 以前の Cookie を保存したファイルがあれば読み込む
+    QFile cookieFile(".cookie");
+    if (cookieFile.open(QFile::ReadOnly)) {
+        QList<QNetworkCookie> list;
+        QByteArray line;
+        while (!(line = cookieFile.readLine()).isEmpty()) {
+            list.append(QNetworkCookie::parseCookies(line));
+        }
+        cookieFile.close();
+        QNetworkCookieJar* cookieJar = new QNetworkCookieJar(this);
+        cookieJar->setCookiesFromUrl(list, gameUrl);
+        ui->webView->page()->networkAccessManager()->setCookieJar(cookieJar);
+    }
+
     ui->webView->settings()->setAttribute(QWebSettings::PluginsEnabled, true);
     resetUrl();
 }
 
 MainWindow::~MainWindow()
 {
+    // Cookie をファイルに保存する
+    QFile cookieFile(".cookie");
+    if (cookieFile.open(QFile::WriteOnly)) {
+        QNetworkCookieJar* cookieJar = ui->webView->page()->networkAccessManager()->cookieJar();
+        QList<QNetworkCookie> list = cookieJar->cookiesForUrl(gameUrl);
+        for (int i=0; i<list.size(); ++i) {
+            cookieFile.write(list.at(i).toRawForm());
+            cookieFile.write("\n");
+        }
+        cookieFile.close();
+    }
+
     delete ui;
 }
 
 void MainWindow::resetUrl()
 {
-    ui->webView->load(QUrl("http://www.dmm.com/netgame/social/-/gadgets/=/app_id=854854/"));
+    ui->webView->load(gameUrl);
 }
 
 void MainWindow::resetSize()
