@@ -5,6 +5,7 @@
 #include <QJsonArray>
 #include <QDateTime>
 #include <QDebug>
+#include <QFile>
 
 BodyParserMain::BodyParserMain(QObject *parent) :
     BodyParserBase(parent)
@@ -20,8 +21,14 @@ void BodyParserMain::parse(QUrl url, QByteArray body)
         // JSON のパース
         QJsonDocument json = QJsonDocument::fromJson(body);
 
-        qDebug() << url.path();
-//        qDebug() << json.toJson();
+        // デバッグ用に JSON をファイルに
+        QFile file("debug_json/" + url.path().replace("/", "_") + ".json");
+        if (file.open(QIODevice::WriteOnly)) {
+            file.write(body);
+        } else {
+            qWarning() << "cannot open file";
+        }
+        file.close();
 
         if (url.path() == "/kcsapi/api_get_member/deck_port") {
             QStringList message;
