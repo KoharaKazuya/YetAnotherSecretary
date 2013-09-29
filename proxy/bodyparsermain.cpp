@@ -1,6 +1,9 @@
 #include "bodyparsermain.h"
 
 #include <QJsonDocument>
+#include <QJsonObject>
+#include <QJsonArray>
+#include <QDateTime>
 #include <QDebug>
 
 BodyParserMain::BodyParserMain(QObject *parent) :
@@ -17,6 +20,23 @@ void BodyParserMain::parse(QUrl url, QByteArray body)
         // JSON のパース
         QJsonDocument json = QJsonDocument::fromJson(body);
 
-        qDebug() << json.toJson();
+        qDebug() << url.path();
+//        qDebug() << json.toJson();
+
+        if (url.path() == "/kcsapi/api_get_member/deck_port") {
+            QStringList message;
+            QDateTime now = QDateTime::currentDateTime();
+            QJsonArray teams = json.object().take("api_data").toArray();
+            for (QJsonArray::const_iterator ite=teams.constBegin(); ite!=teams.constEnd(); ++ite) {
+                QJsonObject team = (*ite).toObject();
+                QJsonArray misson = team.take("api_mission").toArray();
+                qint64 finishTimeEpoch = misson.at(2).toDouble();
+                if (finishTimeEpoch > 0) {
+                    QDateTime finishTime = QDateTime::fromMSecsSinceEpoch(finishTimeEpoch);
+                    message << team.take("api_name").toString() + ":" + QString::number(now.secsTo(finishTime));
+                }
+            }
+            runHandlers("ensei_wait", message);
+        }
     }
 }
