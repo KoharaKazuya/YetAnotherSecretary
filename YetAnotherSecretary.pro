@@ -2,5 +2,4 @@ TARGET = YetAnotherSecretary
 
 TEMPLATE = subdirs
 
-SUBDIRS = gui proxy \
-    socket
+SUBDIRS = gui proxy socket
