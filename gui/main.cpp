@@ -13,7 +13,6 @@ int main(int argc, char *argv[])
     QApplication a(argc, argv);
 
     QString host;
-    int port;
     if (argc == 1) {
     } else if (argc == 2) {
         QStringList entries = QString(argv[1]).split(':');

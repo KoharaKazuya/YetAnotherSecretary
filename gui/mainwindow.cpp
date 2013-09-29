@@ -14,6 +14,12 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
+    // メッセージバーのセットアップ
+    messageBar = new MessageBar(ui->webView);
+    connect(this, SIGNAL(sizeChanged(QSize)), messageBar, SLOT(setPreferGeometory(QSize)));
+
+    gameUrl = QUrl("http://www.dmm.com/netgame/social/-/gadgets/=/app_id=854854/");
+
     // 以前の Cookie を保存したファイルがあれば読み込む
     QFile cookieFile(".cookie");
     if (cookieFile.open(QFile::ReadOnly)) {
@@ -64,9 +70,12 @@ void MainWindow::resetSize()
 
 void MainWindow::resizeEvent(QResizeEvent* resizeEvent)
 {
+    // アスペクト比の固定
     QSize size = resizeEvent->size();
-    size.setHeight(size.width() *3/5);
+    size.setWidth(size.height() *5/3);
     this->resize(size);
+
+    emit sizeChanged(this->size());
 }
 
 void MainWindow::toggleOnTopWindow(bool)

@@ -1,6 +1,8 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include "messagebar.h"
+
 #include <QMainWindow>
 #include <QUrl>
 
@@ -21,6 +23,9 @@ public slots:
     void resetSize();
     void toggleOnTopWindow(bool top);
 
+signals:
+    void sizeChanged(QSize size);
+
 protected:
     void resizeEvent(QResizeEvent* resizeEvent);
 
@@ -32,7 +37,8 @@ private slots:
 private:
     Ui::MainWindow *ui;
 
-    const QUrl gameUrl = QUrl("http://www.dmm.com/netgame/social/-/gadgets/=/app_id=854854/");
+    MessageBar* messageBar;
+    QUrl gameUrl;
 };
 
 #endif // MAINWINDOW_H
