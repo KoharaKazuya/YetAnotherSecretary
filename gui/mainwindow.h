@@ -18,6 +18,8 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
+    MessageBar* messageBar;
+
 public slots:
     void resetUrl();
     void resetSize();
@@ -37,7 +39,6 @@ private slots:
 private:
     Ui::MainWindow *ui;
 
-    MessageBar* messageBar;
     QUrl gameUrl;
 };
 

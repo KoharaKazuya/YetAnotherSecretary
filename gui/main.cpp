@@ -1,4 +1,6 @@
 #include "mainwindow.h"
+#include "apiserver.h"
+
 #include <QApplication>
 #include <QNetworkProxy>
 
@@ -12,6 +14,7 @@ int main(int argc, char *argv[])
 {
     QApplication a(argc, argv);
 
+    // 引数の処理
     QString host;
     if (argc == 1) {
     } else if (argc == 2) {
@@ -30,6 +33,11 @@ int main(int argc, char *argv[])
     }
 
     MainWindow w;
+
+    // API サーバーのセットアップ
+    ApiServer api;
+    QObject::connect(&api, SIGNAL(apiStatusLine(QString)), w.messageBar, SLOT(setText(QString)));
+
     w.show();
 
     return a.exec();

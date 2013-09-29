@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       += core gui webkitwidgets
+QT       += core gui webkitwidgets network
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -14,9 +14,11 @@ TEMPLATE = app
 
 SOURCES += main.cpp\
         mainwindow.cpp \
-    messagebar.cpp
+    messagebar.cpp \
+    apiserver.cpp
 
 HEADERS  += mainwindow.h \
-    messagebar.h
+    messagebar.h \
+    apiserver.h
 
 FORMS    += mainwindow.ui

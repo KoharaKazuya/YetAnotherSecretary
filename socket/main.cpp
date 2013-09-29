@@ -14,6 +14,7 @@ int main(int argc, char *argv[])
     socket->connectToServer("yetanothersecretary_gui_" + target, QIODevice::WriteOnly);
     if (socket->waitForConnected(10000)) {
         socket->write(message);
+        socket->flush();
         socket->close();
         return 0;
     } else {
