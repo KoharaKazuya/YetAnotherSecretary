@@ -5,6 +5,7 @@
 
 #include <QMainWindow>
 #include <QUrl>
+#include <QLocalSocket>
 
 namespace Ui {
 class MainWindow;
@@ -24,6 +25,7 @@ public slots:
     void resetUrl();
     void resetSize();
     void toggleOnTopWindow(bool top);
+    void api_statusline(QLocalSocket* socket, QString message);
 
 signals:
     void sizeChanged(QSize size);

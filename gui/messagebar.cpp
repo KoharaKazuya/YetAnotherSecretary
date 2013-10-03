@@ -30,7 +30,7 @@ void MessageBar::mouseDoubleClickEvent(QMouseEvent *ev) { ev->ignore(); }
 
 void MessageBar::enterEvent(QEvent *)
 {
-    qss.replace(QRegExp("^background-color:[^;]*;"), "background-color: rgba(0,0,0,0.25);");
+    qss.replace(QRegExp("^background-color:[^;]*;"), "background-color: rgba(0,0,0,0.5);");
     qss.replace(QRegExp(";color:[^;]*;"), ";color: white;");
     setStyleSheet(qss);
 }

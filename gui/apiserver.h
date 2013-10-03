@@ -13,7 +13,7 @@ public:
     ~ApiServer();
 
 signals:
-    void apiStatusLine(QString text);
+    void apiStatusLine(QLocalSocket*, QString);
 
 public slots:
 

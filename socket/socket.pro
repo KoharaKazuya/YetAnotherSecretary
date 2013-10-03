@@ -4,7 +4,7 @@
 #
 #-------------------------------------------------
 
-QT       = network
+QT       = core network
 
 TARGET = socket
 CONFIG   += console
@@ -13,4 +13,8 @@ CONFIG   -= app_bundle
 TEMPLATE = app
 
 
-SOURCES += main.cpp
+SOURCES += main.cpp \
+    socketmain.cpp
+
+HEADERS += \
+    socketmain.h

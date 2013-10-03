@@ -115,3 +115,18 @@ void MainWindow::checkFlashLoaded()
                                                   + "</body></html>");
     }
 }
+
+/**
+ * ステータスライン API へのメッセージの処理
+ */
+void MainWindow::api_statusline(QLocalSocket* socket, QString message)
+{
+    QStringList entries = message.split(' ');
+    QString subCommand = entries.takeFirst();
+    if (subCommand == "set") {
+        messageBar->setText(entries.join(' '));
+    } else if (subCommand == "get") {
+        socket->write(messageBar->text().toLocal8Bit());
+        socket->flush();
+    }
+}

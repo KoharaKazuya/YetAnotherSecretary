@@ -14,6 +14,13 @@ signals:
 public slots:
     void parse(QUrl url, QByteArray body);
 
+private:
+    void api_ApiGetMember_DeckPort(QJsonObject json);
+
+private slots:
+    void api_timeoutInterval();
+    void api_timeoutEnsei();
+
 };
 
 #endif // BODYPARSERMAIN_H

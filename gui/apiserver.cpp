@@ -18,7 +18,7 @@ void ApiServer::newApiConnection()
 {
     QLocalServer* server = qobject_cast<QLocalServer*>(sender());
     QLocalSocket* socket = server->nextPendingConnection();
-    connect(socket, SIGNAL(readChannelFinished()), this, SLOT(receiveApiMessage()));
+    connect(socket, SIGNAL(readyRead()), this, SLOT(receiveApiMessage()));
     connect(socket, SIGNAL(disconnected()), socket, SLOT(deleteLater()));
 }
 
@@ -30,5 +30,7 @@ void ApiServer::receiveApiMessage()
 
     // API の振り分け
     if (api == "statusline")
-        emit apiStatusLine(message);
+        emit apiStatusLine(socket, message);
+
+    socket->disconnectFromServer();
 }

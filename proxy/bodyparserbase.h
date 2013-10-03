@@ -20,6 +20,9 @@ public slots:
 protected:
     void runHandlers(QString eventName, QStringList args);
 
+private slots:
+    void outputError();
+
 };
 
 #endif // BODYPARSERBASE_H

@@ -36,7 +36,7 @@ int main(int argc, char *argv[])
 
     // API サーバーのセットアップ
     ApiServer api;
-    QObject::connect(&api, SIGNAL(apiStatusLine(QString)), w.messageBar, SLOT(setText(QString)));
+    QObject::connect(&api, SIGNAL(apiStatusLine(QLocalSocket*, QString)), &w, SLOT(api_statusline(QLocalSocket*, QString)));
 
     w.show();
 
