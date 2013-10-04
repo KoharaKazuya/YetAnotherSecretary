@@ -1,0 +1,4 @@
+#!/bin/sh
+
+echo "$*" | /Users/kohara/bin/notify
+

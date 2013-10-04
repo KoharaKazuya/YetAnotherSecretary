@@ -1,0 +1,20 @@
+#!/bin/sh
+
+echo "$*"
+
+SOCKET="../socket/soket"
+
+#echo "$*" | /Users/kohara/bin/notify
+#echo `../socket/socket statusline get`
+prev=`../socket/socket statusline get`
+if [ `echo $prev | grep $1` ]; then
+  echo replace
+  text=`echo $prev | sed -e "s/${1}:[0-9]*/${1}:${2}/"`
+else
+  echo add $prev
+  text="$prev $1:$2"
+fi
+# 多重起動に対応していないため、上記の処理中に他のプロセス（このスクリプトを実行する）に割り込まれ、バグが発生する。
+../socket/socket statusline set $text
+echo $text
+

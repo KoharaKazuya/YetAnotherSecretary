@@ -1,0 +1,4 @@
+#!/bin/sh
+
+osascript -e "beep 3"
+
